@@ -2,22 +2,25 @@
 
 internal class Program
 {
-    private static void Main(string[] args)
+    private static async Task Main(string[] args)
     {
+        var cacheRefresh = TimeSpan.FromMinutes(2);
+
         Console.WriteLine("Starting redirection service...");
 
         var redirectionService = new RedirectionService();
         
         // TODO: Parse json into list
-        var redirectsJson = RedirectProviderService.GetRedirectsJson();
-        var redirects = RedirectProviderService.GetRedirectsList();
 
-        foreach (var redirect in redirects)
+        while (true)
         {
-            redirectionService.HandleRedirect(redirect);
-        }
+            //var redirectsJson = RedirectProviderService.GetRedirectsJson();
+            var redirects = RedirectProviderService.GetRedirectsList();
 
-        System.Console.WriteLine("All redirects processed...");
-        System.Console.WriteLine("Exiting...");
+            System.Console.WriteLine("Processing requests...");
+            await redirectionService.HandleRedirectsAsync(redirects);
+
+            await Task.Delay(cacheRefresh);
+        }
     }
 }
